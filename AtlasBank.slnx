@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AtlasBank.API/AtlasBank.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Accounts/">
+    <Project Path="src/Modules/Accounts/AtlasBank.Accounts.Application/AtlasBank.Accounts.Application.csproj" />
+    <Project Path="src/Modules/Accounts/AtlasBank.Accounts.Domain/AtlasBank.Accounts.Domain.csproj" />
+    <Project Path="src/Modules/Accounts/AtlasBank.Accounts.Infrastructure/AtlasBank.Accounts.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payments/">
+    <Project Path="src/Modules/Payments/AtlasBank.Payments.Application/AtlasBank.Payments.Application.csproj" />
+    <Project Path="src/Modules/Payments/AtlasBank.Payments.Domain/AtlasBank.Payments.Domain.csproj" />
+    <Project Path="src/Modules/Payments/AtlasBank.Payments.Infrastructure/AtlasBank.Payments.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Wallets/">
+    <Project Path="src/Modules/Wallets/AtlasBank.Wallets.Application/AtlasBank.Wallets.Application.csproj" />
+    <Project Path="src/Modules/Wallets/AtlasBank.Wallets.Domain/AtlasBank.Wallets.Domain.csproj" />
+    <Project Path="src/Modules/Wallets/AtlasBank.Wallets.Infrastructure/AtlasBank.Wallets.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AtlasBank.Accounts.Tests/AtlasBank.Accounts.Tests.csproj" />
+    <Project Path="tests/AtlasBank.Payments.Tests/AtlasBank.Payments.Tests.csproj" />
+    <Project Path="tests/AtlasBank.Wallets.Tests/AtlasBank.Wallets.Tests.csproj" />
+  </Folder>
+</Solution>
