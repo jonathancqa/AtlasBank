@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/AtlasBank.API/AtlasBank.API.csproj" />
+    <Project Path="src/AtlasBank.SharedKernel/AtlasBank.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Accounts/">
