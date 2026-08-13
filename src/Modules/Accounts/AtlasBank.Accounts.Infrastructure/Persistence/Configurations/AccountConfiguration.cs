@@ -35,29 +35,27 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(a => a.CreatedAt)
             .IsRequired();
 
-        // Mapeamento do Value Object Email
+        // Índices únicos via OwnsOne
         builder.OwnsOne(a => a.Email, email =>
         {
             email.Property(e => e.Address)
                 .HasColumnName("email")
                 .IsRequired()
                 .HasMaxLength(254);
+
+            email.HasIndex(e => e.Address)
+                .IsUnique();
         });
 
-        // Mapeamento do Value Object Document (CPF)
         builder.OwnsOne(a => a.Document, document =>
         {
             document.Property(d => d.Number)
                 .HasColumnName("document")
                 .IsRequired()
                 .HasMaxLength(11);
+
+            document.HasIndex(d => d.Number)
+                .IsUnique();
         });
-
-        // Índices únicos — e-mail e CPF não podem se repetir
-        builder.HasIndex("email")
-            .IsUnique();
-
-        builder.HasIndex("document")
-            .IsUnique();
     }
 }
