@@ -1,4 +1,5 @@
 using AtlasBank.Accounts.Application.Abstractions;
+using AtlasBank.Accounts.Application.Commands.CreateAccount;
 using AtlasBank.Accounts.Infrastructure.Persistence;
 using AtlasBank.Accounts.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ public static class DependencyInjection
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(
-                typeof(DependencyInjection).Assembly));
+                typeof(CreateAccountCommand).Assembly));
 
         return services;
     }
