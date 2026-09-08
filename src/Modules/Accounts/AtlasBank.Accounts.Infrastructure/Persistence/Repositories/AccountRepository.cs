@@ -24,7 +24,7 @@ public sealed class AccountRepository : IAccountRepository
         string email,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
-            .FirstOrDefaultAsync(a => a.Email.Address == email, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Email.Address == email.Trim().ToLowerInvariant(), cancellationToken);
 
     public async Task<Account?> GetByDocumentAsync(
         string document,
@@ -47,5 +47,8 @@ public sealed class AccountRepository : IAccountRepository
     public async Task AddAsync(
         Account account,
         CancellationToken cancellationToken = default)
-        => await _context.Accounts.AddAsync(account, cancellationToken);
+    {
+        await _context.Accounts.AddAsync(account, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

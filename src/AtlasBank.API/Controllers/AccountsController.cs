@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AtlasBank.Accounts.Application.Commands.CreateAccount;
+using AtlasBank.Accounts.Application.Commands.Login;
 using AtlasBank.SharedKernel.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -34,5 +35,20 @@ namespace AtlasBank.API.Controllers
                 ApiResponse<Guid>.Ok(result.Value, "Account created successfully."));
         }
 
+        /// <summary>Autentica uma conta e retorna o token JWT.<summary>
+        [HttpPost("login")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Login(
+            [FromBody] LoginCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+
+            if (result.IsFailure)
+                return BadRequest(ApiResponse<string>.Fail(result.Error));
+
+            return Ok(ApiResponse<string>.Ok(result.Value, "Login successful."));
+        }
     }
 }
