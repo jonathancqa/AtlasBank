@@ -1,7 +1,9 @@
 using AtlasBank.Accounts.Application.Abstractions;
+using AtlasBank.Accounts.Application.Abstractions.Services;
 using AtlasBank.Accounts.Application.Commands.CreateAccount;
 using AtlasBank.Accounts.Infrastructure.Persistence;
 using AtlasBank.Accounts.Infrastructure.Persistence.Repositories;
+using AtlasBank.Accounts.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +23,7 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IJwtService, JwtService>();
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(
