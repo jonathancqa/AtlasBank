@@ -20,4 +20,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Modules\Accounts\AtlasBank.Accounts.Domain\AtlasBank.Accounts.Domain.csproj" />
+    <ProjectReference Include="..\..\src\AtlasBank.SharedKernel\AtlasBank.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Accounts\AtlasBank.Accounts.Application\AtlasBank.Accounts.Application.csproj" />
+  </ItemGroup>
+
 </Project>
