@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Modules\Accounts\AtlasBank.Accounts.Infrastructure\AtlasBank.Accounts.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Wallets\AtlasBank.Wallets.Infrastructure\AtlasBank.Wallets.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

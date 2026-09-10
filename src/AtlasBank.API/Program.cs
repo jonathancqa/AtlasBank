@@ -1,5 +1,6 @@
 using System.Text;
 using AtlasBank.Accounts.Infrastructure;
+using AtlasBank.Wallets.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -11,6 +12,7 @@ builder.Services.AddSwaggerGen();
 
 // Módulos
 builder.Services.AddAccountsModule(builder.Configuration);
+builder.Services.AddWalletsModule(builder.Configuration);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
