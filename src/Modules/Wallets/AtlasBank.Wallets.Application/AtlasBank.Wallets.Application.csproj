@@ -11,4 +11,9 @@
     <PackageReference Include="MediatR" Version="14.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AtlasBank.Wallets.Domain\AtlasBank.Wallets.Domain.csproj" />
+    <ProjectReference Include="..\..\..\AtlasBank.SharedKernel\AtlasBank.SharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>
