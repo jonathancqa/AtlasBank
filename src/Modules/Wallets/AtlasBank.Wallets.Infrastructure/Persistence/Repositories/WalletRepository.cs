@@ -52,7 +52,17 @@ public sealed class WalletRepository : IWalletRepository
         Wallet wallet,
         CancellationToken cancellationToken = default)
     {
-        _context.Wallets.Update(wallet);
+        _context.Entry(wallet).State = EntityState.Modified;
+
+        foreach (var transaction in wallet.Transactions)
+        {
+            var entry = _context.Entry(transaction);
+            if (entry.State == EntityState.Detached)
+            {
+                _context.Transactions.Add(transaction);
+            }
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
