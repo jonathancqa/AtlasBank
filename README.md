@@ -6,7 +6,7 @@
 
 ## 📋 About
 
-AtlasBank is a portfolio project that simulates the core backend of a digital bank, demonstrating production-grade patterns used in real financial systems such as transactional consistency, idempotency, domain events, and payment gateway integration.
+AtlasBank is a portfolio project that simulates the core backend of a digital bank, demonstrating production-grade patterns used in real financial systems such as transactional consistency, idempotency, domain events, Unit of Work, and payment gateway integration.
 
 ---
 
@@ -33,16 +33,16 @@ AtlasBank follows a **Modular Monolith** approach — a single deployable unit w
 ```
 AtlasBank/
 ├── src/
-│   ├── AtlasBank.API                     # Entry point, controllers, middleware
-│   ├── AtlasBank.SharedKernel            # Shared abstractions and primitives
-│   └── Modules/
-│       ├── Accounts                      # User registration and authentication
-│       ├── Wallets                       # Wallet, balance, transactions, statement
-│       └── Payments                      # Payment gateway integration
+│ ├── AtlasBank.API # Entry point, controllers, middleware
+│ ├── AtlasBank.SharedKernel # Shared abstractions and primitives
+│ └── Modules/
+│ ├── Accounts # User registration and authentication
+│ ├── Wallets # Wallet, balance, transactions, statement
+│ └── Payments # Payment gateway integration
 └── tests/
-    ├── AtlasBank.Accounts.Tests
-    ├── AtlasBank.Wallets.Tests
-    └── AtlasBank.Payments.Tests
+├── AtlasBank.Accounts.Tests # 65 tests
+├── AtlasBank.Wallets.Tests # 60 tests
+└── AtlasBank.Payments.Tests
 ```
 
 ### Why Modular Monolith over Microservices?
@@ -60,20 +60,25 @@ Shared building blocks used across all modules:
 - `ValueObject` — base class for value-based equality
 - `Result<T>` — eliminates exceptions from business flow
 - `Money` — monetary value object using `decimal` (never `double`)
+- `IUnitOfWork` — contract for atomic persistence
 
 ### Accounts
 Handles user registration and authentication.
 - `Account` aggregate root with `Email` and `Document` (CPF) value objects
 - CPF validation using the official Receita Federal algorithm
+- JWT authentication
 - Domain event: `AccountCreatedEvent`
 
-### Wallets *(in progress)*
+### Wallets
 Handles wallet creation, deposits, withdrawals, transfers and statements.
-- Idempotency keys to prevent duplicate transactions
-- Optimistic concurrency control to handle simultaneous operations
-- Append-only audit log for every financial event
+- `Wallet` aggregate root with `Transaction` entities
+- `IdempotencyKey` value object — prevents duplicate transactions
+- Deposit, Withdraw, Transfer with idempotency guarantees
+- Statement query with pagination and date filters
+- Unit of Work for atomic persistence across aggregates
+- Domain events: `WalletCreatedEvent`, `DepositCompletedEvent`, `WithdrawCompletedEvent`, `TransferCompletedEvent`
 
-### Payments *(in progress)*
+### Payments *(coming soon)*
 Handles payment gateway integration with a clean abstraction layer.
 - `IPaymentGateway` interface — domain has no knowledge of external providers
 - `MockPaymentGateway` — for fast, network-free testing
@@ -87,11 +92,8 @@ Handles payment gateway integration with a clean abstraction layer.
 ### Idempotency
 Every transaction endpoint requires an `Idempotency-Key` header. Replayed requests return the same result without reprocessing — critical for unreliable networks and client retries.
 
-### Concurrency Control
-Simultaneous operations on the same wallet are handled via optimistic concurrency (`RowVersion`). Prevents race conditions on balance updates.
-
-### Audit Log
-Every financial event is recorded in an append-only table — no `UPDATE`, no `DELETE`. Full traceability from any transaction ID.
+### Unit of Work
+`SaveChanges` is never called inside repositories. The Unit of Work controls when changes are committed, enabling atomic operations across multiple aggregates (e.g. transfer debits source and credits destination in a single transaction).
 
 ### Result Pattern
 Business rules return `Result<T>` instead of throwing exceptions. Failures are explicit, predictable, and easy to test.
@@ -106,6 +108,28 @@ var result = wallet.Withdraw(Money.Create(100m, "BRL").Value);
 if (result.IsFailure)
     return BadRequest(result.Error); // "Insufficient funds."
 ```
+
+---
+
+## 🌐 API Endpoints
+
+### Accounts
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/accounts` | Create a new account |
+| POST | `/api/accounts/login` | Authenticate and receive JWT token |
+
+### Wallets
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/wallets` | Create a wallet for an account |
+| GET | `/api/wallets/{id}/balance` | Get current balance |
+| GET | `/api/wallets/{id}/statement` | Get transaction statement (paginated) |
+| POST | `/api/wallets/{id}/deposit` | Deposit funds |
+| POST | `/api/wallets/{id}/withdraw` | Withdraw funds |
+| POST | `/api/wallets/{id}/transfer` | Transfer to another wallet |
+
+> ⚠️ Deposit, Withdraw and Transfer require `Idempotency-Key` header.
 
 ---
 
@@ -130,6 +154,7 @@ dotnet run --project src/AtlasBank.API
 ```
 
 API will be available at `http://localhost:5000`
+Swagger UI at `http://localhost:5000/swagger`
 
 ### Running with Docker
 
@@ -145,23 +170,29 @@ docker-compose up --build
 dotnet test
 ```
 
+**125 tests, 0 failures.**
+
 ---
 
 ## 🛣️ Roadmap
 
 - [x] Solution structure and project setup
-- [x] SharedKernel — Entity, AggregateRoot, ValueObject, Result, Money
-- [x] Accounts domain — Account aggregate, Email VO, Document VO
-- [ ] Accounts application — CreateAccount command, JWT authentication
-- [ ] Accounts infrastructure — EF Core mapping, repository, migrations
-- [ ] Wallets domain — Wallet aggregate, Transaction entity, idempotency
-- [ ] Wallets application — Deposit, Withdraw, Transfer commands, Statement query
-- [ ] Wallets infrastructure — EF Core mapping, concurrency control, audit log
+- [x] SharedKernel — Entity, AggregateRoot, ValueObject, Result, Money, IUnitOfWork
+- [x] Accounts domain — Account aggregate, Email VO, Document VO (CPF validation)
+- [x] Accounts application — CreateAccount, Login commands, JWT authentication
+- [x] Accounts infrastructure — EF Core mapping, repository, migrations, Unit of Work
+- [x] Wallets domain — Wallet aggregate, Transaction entity, IdempotencyKey, domain events
+- [x] Wallets application — Deposit, Withdraw, Transfer commands, Statement query
+- [x] Wallets infrastructure — EF Core mapping, repository, migrations, Unit of Work
+- [x] API — AccountsController, WalletsController, Swagger, enum serialization
+- [x] Tests — 125 unit tests, 0 failures
+- [ ] Authentication — [Authorize] on endpoints, IDOR prevention
 - [ ] Payments domain — IPaymentGateway abstraction
 - [ ] Payments infrastructure — MockGateway, MercadoPago sandbox (Pix, boleto, card)
-- [ ] API — controllers, JWT middleware, rate limiting, error handling
-- [ ] Docker — full docker-compose with API + PostgreSQL
-- [ ] Tests — unit (domain) + integration (real PostgreSQL)
+- [ ] CI — GitHub Actions (build + tests)
+- [ ] Docker — Dockerfile + full docker-compose with API + PostgreSQL
+- [ ] Concurrency — RowVersion optimistic concurrency control
+- [ ] Audit log — append-only financial event log
 
 ---
 
@@ -174,6 +205,7 @@ dotnet test
 | Modular Monolith | Single deployable | Same architectural discipline as microservices without premature complexity |
 | PostgreSQL | over SQL Server | Standard in modern Brazilian fintechs, open source, cloud-native |
 | UTC timestamps | `DateTime.UtcNow` | Financial systems operate across time zones — UTC is the safe standard |
+| Unit of Work | Centralized SaveChanges | Atomic persistence across aggregates — repositories never call SaveChanges |
 | Mock + Real gateway | `IPaymentGateway` | Tests run fast against Mock; demos and integration use MercadoPago sandbox |
 
 ---
