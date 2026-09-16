@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Domain.Entities;
@@ -11,9 +12,13 @@ namespace AtlasBank.Wallets.Application.Commands.CreateWallet;
 public sealed class CreateWalletHandler : IRequestHandler<CreateWalletCommand, Result<Guid>>
 {
     private readonly IWalletRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateWalletHandler(IWalletRepository repository)
-        => _repository = repository;
+    public CreateWalletHandler(IWalletRepository repository, IUnitOfWork unitOfWork)
+    {
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+    }
 
     public async Task<Result<Guid>> Handle(
         CreateWalletCommand command,
@@ -33,6 +38,7 @@ public sealed class CreateWalletHandler : IRequestHandler<CreateWalletCommand, R
             return Result.Failure<Guid>(walletResult.Error);
 
         await _repository.AddAsync(walletResult.Value, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success(walletResult.Value.Id);
     }

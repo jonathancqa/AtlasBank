@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Application.Commands.CreateWallet;
 using AtlasBank.Wallets.Domain.Entities;
@@ -9,6 +10,7 @@ namespace AtlasBank.Wallets.Tests.Application.Commands;
 public sealed class CreateWalletHandlerTests
 {
     private readonly IWalletRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly CreateWalletHandler _handler;
 
     private static readonly Guid ValidAccountId = Guid.NewGuid();
@@ -16,7 +18,8 @@ public sealed class CreateWalletHandlerTests
     public CreateWalletHandlerTests()
     {
         _repository = Substitute.For<IWalletRepository>();
-        _handler = new CreateWalletHandler(_repository);
+        _unitOfWork = Substitute.For<IUnitOfWork>();
+        _handler = new CreateWalletHandler(_repository, _unitOfWork);
     }
 
     [Fact]

@@ -18,37 +18,39 @@ public sealed class AccountRepository : IAccountRepository
         Guid id,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
+            .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
     public async Task<Account?> GetByEmailAsync(
         string email,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
+            .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Email.Address == email.Trim().ToLowerInvariant(), cancellationToken);
 
     public async Task<Account?> GetByDocumentAsync(
         string document,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
+            .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Document.Number == document, cancellationToken);
 
     public async Task<bool> ExistsByEmailAsync(
         string email,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
+            .AsNoTracking()
             .AnyAsync(a => a.Email.Address == email, cancellationToken);
 
     public async Task<bool> ExistsByDocumentAsync(
         string document,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
+            .AsNoTracking()
             .AnyAsync(a => a.Document.Number == document, cancellationToken);
 
     public async Task AddAsync(
         Account account,
         CancellationToken cancellationToken = default)
-    {
-        await _context.Accounts.AddAsync(account, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
+        => await _context.Accounts.AddAsync(account, cancellationToken);
 }

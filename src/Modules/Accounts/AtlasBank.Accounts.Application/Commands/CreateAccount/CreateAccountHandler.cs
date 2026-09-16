@@ -1,5 +1,6 @@
 using AtlasBank.Accounts.Application.Abstractions;
 using AtlasBank.Accounts.Domain.Entities;
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.Primitives;
 using MediatR;
 
@@ -12,9 +13,12 @@ namespace AtlasBank.Accounts.Application.Commands.CreateAccount;
 public sealed class CreateAccountHandler : IRequestHandler<CreateAccountCommand, Result<Guid>>
 {
     private readonly IAccountRepository _repository;
-
-    public CreateAccountHandler(IAccountRepository repository)
-        => _repository = repository;
+    private readonly IUnitOfWork _unitOfWork;
+    public CreateAccountHandler(IAccountRepository repository, IUnitOfWork unitOfWork)
+    {
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+    }
 
     public async Task<Result<Guid>> Handle(
         CreateAccountCommand command,
@@ -48,6 +52,7 @@ public sealed class CreateAccountHandler : IRequestHandler<CreateAccountCommand,
             return Result.Failure<Guid>(accountResult.Error);
 
         await _repository.AddAsync(accountResult.Value, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success(accountResult.Value.Id);
     }

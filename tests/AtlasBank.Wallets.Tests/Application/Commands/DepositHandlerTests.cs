@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Application.Commands.Deposit;
@@ -11,12 +12,15 @@ namespace AtlasBank.Wallets.Tests.Application.Commands;
 public sealed class DepositHandlerTests
 {
     private readonly IWalletRepository _repository;
+
+    private readonly IUnitOfWork _unitOfWork;
     private readonly DepositHandler _handler;
 
     public DepositHandlerTests()
     {
         _repository = Substitute.For<IWalletRepository>();
-        _handler = new DepositHandler(_repository);
+        _unitOfWork = Substitute.For<IUnitOfWork>();
+        _handler = new DepositHandler(_repository, _unitOfWork);
     }
 
     private static Wallet CreateWalletWithBalance(decimal amount = 0)

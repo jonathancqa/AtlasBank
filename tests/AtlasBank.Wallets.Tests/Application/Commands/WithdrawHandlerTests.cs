@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Application.Commands.Withdraw;
@@ -11,12 +12,14 @@ namespace AtlasBank.Wallets.Tests.Application.Commands;
 public sealed class WithdrawHandlerTests
 {
     private readonly IWalletRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly WithdrawHandler _handler;
 
     public WithdrawHandlerTests()
     {
         _repository = Substitute.For<IWalletRepository>();
-        _handler = new WithdrawHandler(_repository);
+        _unitOfWork = Substitute.For<IUnitOfWork>();
+        _handler = new WithdrawHandler(_repository, _unitOfWork);
     }
 
     private static Wallet CreateWalletWithBalance(decimal amount = 100)

@@ -1,6 +1,7 @@
 using AtlasBank.Accounts.Application.Abstractions;
 using AtlasBank.Accounts.Application.Commands.CreateAccount;
 using AtlasBank.Accounts.Domain.Entities;
+using AtlasBank.SharedKernel.Abstractions;
 using FluentAssertions;
 using NSubstitute;
 
@@ -9,6 +10,7 @@ namespace AtlasBank.Accounts.Tests.Application;
 public sealed class CreateAccountHandlerTests
 {
     private readonly IAccountRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly CreateAccountHandler _handler;
 
     private const string ValidFullName = "Jonathan Alves";
@@ -19,7 +21,8 @@ public sealed class CreateAccountHandlerTests
     public CreateAccountHandlerTests()
     {
         _repository = Substitute.For<IAccountRepository>();
-        _handler = new CreateAccountHandler(_repository);
+        _unitOfWork = Substitute.For<IUnitOfWork>();
+        _handler = new CreateAccountHandler(_repository, _unitOfWork);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
@@ -12,9 +13,13 @@ namespace AtlasBank.Wallets.Application.Commands.Deposit;
 public sealed class DepositHandler : IRequestHandler<DepositCommand, Result>
 {
     private readonly IWalletRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DepositHandler(IWalletRepository repository)
-        => _repository = repository;
+    public DepositHandler(IWalletRepository repository, IUnitOfWork unitOfWork)
+    {
+        _repository = repository;
+        _unitOfWork = unitOfWork;        
+    }
 
     public async Task<Result> Handle(
         DepositCommand command,
@@ -41,6 +46,7 @@ public sealed class DepositHandler : IRequestHandler<DepositCommand, Result>
             return Result.Failure(depositResult.Error);
 
         await _repository.UpdateAsync(wallet, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success();
     }

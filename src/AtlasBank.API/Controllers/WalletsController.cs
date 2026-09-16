@@ -91,7 +91,7 @@ public sealed class WalletsController : ControllerBase
         if (result.IsFailure)
             return BadRequest(ApiResponse<string>.Fail(result.Error));
 
-        return Ok(ApiResponse<string>.Ok("Deposit completed successfully."));
+        return Ok(ApiResponse<string>.Ok(null!, "Deposit completed successfully."));
     }
 
     /// <summary>Realiza um saque de uma carteira.</summary>
@@ -110,7 +110,7 @@ public sealed class WalletsController : ControllerBase
         if (result.IsFailure)
             return BadRequest(ApiResponse<string>.Fail(result.Error));
 
-        return Ok(ApiResponse<string>.Ok("Withdrawal completed successfully."));
+        return Ok(ApiResponse<string>.Ok(null!, "Withdrawal completed successfully."));
     }
 
     /// <summary>Realiza uma transferência entre carteiras.</summary>
@@ -135,7 +135,7 @@ public sealed class WalletsController : ControllerBase
         if (result.IsFailure)
             return BadRequest(ApiResponse<string>.Fail(result.Error));
 
-        return Ok(ApiResponse<string>.Ok("Transfer completed successfully."));
+        return Ok(ApiResponse<string>.Ok(null!, "Transfer completed successfully."));
     }
 }
 

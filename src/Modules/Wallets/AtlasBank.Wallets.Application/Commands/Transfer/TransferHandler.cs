@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
@@ -13,9 +14,13 @@ namespace AtlasBank.Wallets.Application.Commands.Transfer;
 public sealed class TransferHandler : IRequestHandler<TransferCommand, Result>
 {
     private readonly IWalletRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TransferHandler(IWalletRepository repository)
-        => _repository = repository;
+    public TransferHandler(IWalletRepository repository, IUnitOfWork unitOfWork)
+    {
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+    }
 
     public async Task<Result> Handle(
         TransferCommand command,
@@ -58,6 +63,7 @@ public sealed class TransferHandler : IRequestHandler<TransferCommand, Result>
         // Persiste ambas as carteiras
         await _repository.UpdateAsync(source, cancellationToken);
         await _repository.UpdateAsync(destination, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success();
     }

@@ -18,6 +18,7 @@ public sealed class WalletRepository : IWalletRepository
         Guid id,
         CancellationToken cancellationToken = default)
         => await _context.Wallets
+            .AsNoTracking()
             .Include(w => w.Transactions)
             .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
 
@@ -25,6 +26,7 @@ public sealed class WalletRepository : IWalletRepository
         Guid accountId,
         CancellationToken cancellationToken = default)
         => await _context.Wallets
+            .AsNoTracking()
             .Include(w => w.Transactions)
             .FirstOrDefaultAsync(w => w.AccountId == accountId, cancellationToken);
 
@@ -32,21 +34,20 @@ public sealed class WalletRepository : IWalletRepository
         Guid accountId,
         CancellationToken cancellationToken = default)
         => await _context.Wallets
+            .AsNoTracking()
             .AnyAsync(w => w.AccountId == accountId, cancellationToken);
 
     public async Task<bool> ExistsByIdempotencyKeyAsync(
         string idempotencyKey,
         CancellationToken cancellationToken = default)
         => await _context.Transactions
+            .AsNoTracking()
             .AnyAsync(t => t.IdempotencyKey.Value == idempotencyKey, cancellationToken);
 
     public async Task AddAsync(
         Wallet wallet,
         CancellationToken cancellationToken = default)
-    {
-        await _context.Wallets.AddAsync(wallet, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
+        => await _context.Wallets.AddAsync(wallet, cancellationToken);
 
     public async Task UpdateAsync(
         Wallet wallet,
@@ -56,13 +57,8 @@ public sealed class WalletRepository : IWalletRepository
 
         foreach (var transaction in wallet.Transactions)
         {
-            var entry = _context.Entry(transaction);
-            if (entry.State == EntityState.Detached)
-            {
+            if (_context.Entry(transaction).State == EntityState.Detached)
                 _context.Transactions.Add(transaction);
-            }
         }
-
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }
