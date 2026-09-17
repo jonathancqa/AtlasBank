@@ -1,4 +1,3 @@
-using AtlasBank.SharedKernel.Abstractions;
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
@@ -13,12 +12,12 @@ namespace AtlasBank.Wallets.Application.Commands.Withdraw;
 public sealed class WithdrawHandler : IRequestHandler<WithdrawCommand, Result>
 {
     private readonly IWalletRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IWalletsUnitOfWork _walletsUnitOfWork;
 
-    public WithdrawHandler(IWalletRepository repository, IUnitOfWork unitOfWork)
+    public WithdrawHandler(IWalletRepository repository, IWalletsUnitOfWork walletsUnitOfWork)
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
+        _walletsUnitOfWork = walletsUnitOfWork;
     }
 
     public async Task<Result> Handle(
@@ -46,7 +45,7 @@ public sealed class WithdrawHandler : IRequestHandler<WithdrawCommand, Result>
             return Result.Failure(withdrawResult.Error);
 
         await _repository.UpdateAsync(wallet, cancellationToken);
-        await _unitOfWork.CommitAsync(cancellationToken);
+        await _walletsUnitOfWork.CommitAsync(cancellationToken);
 
         return Result.Success();
     }

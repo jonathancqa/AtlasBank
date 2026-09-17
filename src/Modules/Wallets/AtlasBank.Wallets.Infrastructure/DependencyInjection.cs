@@ -21,6 +21,7 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IWalletsUnitOfWork, WalletsUnitOfWork>();
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(

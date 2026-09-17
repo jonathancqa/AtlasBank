@@ -13,14 +13,14 @@ public sealed class DepositHandlerTests
 {
     private readonly IWalletRepository _repository;
 
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IWalletsUnitOfWork _walletsUnitOfWork;
     private readonly DepositHandler _handler;
 
     public DepositHandlerTests()
     {
         _repository = Substitute.For<IWalletRepository>();
-        _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new DepositHandler(_repository, _unitOfWork);
+        _walletsUnitOfWork = Substitute.For<IWalletsUnitOfWork>();
+        _handler = new DepositHandler(_repository, _walletsUnitOfWork);
     }
 
     private static Wallet CreateWalletWithBalance(decimal amount = 0)

@@ -1,13 +1,12 @@
-using AtlasBank.SharedKernel.Abstractions;
+using AtlasBank.Accounts.Application.Abstractions;
 using AtlasBank.Accounts.Infrastructure.Persistence;
 
 namespace AtlasBank.Accounts.Infrastructure.Persistence;
 
 /// <summary>
 /// Implementação do Unit of Work para o módulo Accounts.
-/// Centraliza o SaveChanges garantindo atomicidade entre operações.
 /// </summary>
-public sealed class AccountsUnitOfWork : IUnitOfWork
+public sealed class AccountsUnitOfWork : IAccountsUnitOfWork
 {
     private readonly AccountsDbContext _context;
 

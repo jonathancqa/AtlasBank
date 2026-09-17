@@ -10,7 +10,7 @@ namespace AtlasBank.Accounts.Tests.Application;
 public sealed class CreateAccountHandlerTests
 {
     private readonly IAccountRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAccountsUnitOfWork _accountsUnitOfWork;
     private readonly CreateAccountHandler _handler;
 
     private const string ValidFullName = "Jonathan Alves";
@@ -21,8 +21,8 @@ public sealed class CreateAccountHandlerTests
     public CreateAccountHandlerTests()
     {
         _repository = Substitute.For<IAccountRepository>();
-        _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new CreateAccountHandler(_repository, _unitOfWork);
+        _accountsUnitOfWork = Substitute.For<IAccountsUnitOfWork>();
+        _handler = new CreateAccountHandler(_repository, _accountsUnitOfWork);
     }
 
     [Fact]

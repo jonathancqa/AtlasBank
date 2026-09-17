@@ -12,14 +12,14 @@ namespace AtlasBank.Wallets.Tests.Application.Commands;
 public sealed class TransferHandlerTests
 {
     private readonly IWalletRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IWalletsUnitOfWork _walletsUnitOfWork;
     private readonly TransferHandler _handler;
 
     public TransferHandlerTests()
     {
         _repository = Substitute.For<IWalletRepository>();
-        _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new TransferHandler(_repository, _unitOfWork);
+        _walletsUnitOfWork = Substitute.For<IWalletsUnitOfWork>();
+        _handler = new TransferHandler(_repository, _walletsUnitOfWork);
     }
 
     private static Wallet CreateWalletWithBalance(decimal amount = 100)

@@ -1,13 +1,12 @@
-using AtlasBank.SharedKernel.Abstractions;
+using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Infrastructure.Persistence;
 
 namespace AtlasBank.Wallets.Infrastructure.Persistence;
 
 /// <summary>
 /// Implementação do Unit of Work para o módulo Wallets.
-/// Centraliza o SaveChanges garantindo atomicidade entre operações.
 /// </summary>
-public sealed class WalletsUnitOfWork : IUnitOfWork
+public sealed class WalletsUnitOfWork : IWalletsUnitOfWork
 {
     private readonly WalletsDbContext _context;
 
