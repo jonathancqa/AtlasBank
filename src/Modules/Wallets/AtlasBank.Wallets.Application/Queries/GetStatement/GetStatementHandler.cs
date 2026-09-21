@@ -18,7 +18,7 @@ public sealed class GetStatementHandler : IRequestHandler<GetStatementQuery, Res
         GetStatementQuery query,
         CancellationToken cancellationToken)
     {
-        var wallet = await _repository.GetByIdAsync(query.WalletId, cancellationToken);
+        var wallet = await _repository.GetByIdReadOnlyAsync(query.WalletId, cancellationToken);
 
         if (wallet is null)
             return Result.Failure<GetStatementResponse>("Wallet not found.");

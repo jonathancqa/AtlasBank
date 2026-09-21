@@ -18,7 +18,7 @@ public sealed class GetBalanceHandler : IRequestHandler<GetBalanceQuery, Result<
         GetBalanceQuery query,
         CancellationToken cancellationToken)
     {
-        var wallet = await _repository.GetByIdAsync(query.WalletId, cancellationToken);
+        var wallet = await _repository.GetByIdReadOnlyAsync(query.WalletId, cancellationToken);
 
         if (wallet is null)
             return Result.Failure<GetBalanceResponse>("Wallet not found.");

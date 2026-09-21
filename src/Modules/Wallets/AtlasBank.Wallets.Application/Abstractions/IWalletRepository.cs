@@ -10,6 +10,9 @@ public interface IWalletRepository
     /// <summary>Busca uma carteira pelo Id.</summary>
     Task<Wallet?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    /// <summary>Busca para leitura pura — sem tracking, mais performático.</summary>
+    Task<Wallet?> GetByIdReadOnlyAsync(Guid id, CancellationToken cancellationToken = default);
+
     /// <summary>Busca uma carteira pelo Id da conta.</summary>
     Task<Wallet?> GetByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default);
 

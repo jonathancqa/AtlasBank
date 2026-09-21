@@ -34,7 +34,7 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
-        _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
+        _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
         var query = new GetStatementQuery(wallet.Id);
@@ -71,7 +71,7 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
-        _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
+        _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
         var query = new GetStatementQuery(wallet.Id);
@@ -88,7 +88,7 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
-        _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
+        _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
         var query = new GetStatementQuery(wallet.Id, Page: 1, PageSize: 2);
@@ -107,7 +107,7 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
-        _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
+        _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
         var query = new GetStatementQuery(wallet.Id);
