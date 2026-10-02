@@ -9,6 +9,7 @@ namespace AtlasBank.Wallets.Application.Commands.Withdraw;
 /// </summary>
 public sealed record WithdrawCommand(
     Guid WalletId,
+    Guid AccountId,
     decimal Amount,
     string Currency,
     string IdempotencyKey) : IRequest<Result>;

@@ -37,7 +37,7 @@ public sealed class GetStatementHandlerTests
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var query = new GetStatementQuery(wallet.Id);
+        var query = new GetStatementQuery(wallet.Id, wallet.AccountId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -56,7 +56,7 @@ public sealed class GetStatementHandlerTests
         _repository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((Wallet?)null);
 
-        var query = new GetStatementQuery(Guid.NewGuid());
+        var query = new GetStatementQuery(Guid.NewGuid(), Guid.NewGuid());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -74,7 +74,7 @@ public sealed class GetStatementHandlerTests
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var query = new GetStatementQuery(wallet.Id);
+        var query = new GetStatementQuery(wallet.Id, wallet.AccountId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -91,7 +91,7 @@ public sealed class GetStatementHandlerTests
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var query = new GetStatementQuery(wallet.Id, Page: 1, PageSize: 2);
+        var query = new GetStatementQuery(wallet.Id, wallet.AccountId, Page: 1, PageSize: 2);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -110,7 +110,7 @@ public sealed class GetStatementHandlerTests
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var query = new GetStatementQuery(wallet.Id);
+        var query = new GetStatementQuery(wallet.Id, wallet.AccountId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

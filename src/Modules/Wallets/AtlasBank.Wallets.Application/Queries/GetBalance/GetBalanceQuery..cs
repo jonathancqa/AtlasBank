@@ -6,7 +6,9 @@ namespace AtlasBank.Wallets.Application.Queries.GetBalance;
 /// <summary>
 /// Query para consultar o saldo atual de uma carteira.
 /// </summary>
-public sealed record GetBalanceQuery(Guid WalletId) : IRequest<Result<GetBalanceResponse>>;
+public sealed record GetBalanceQuery(
+    Guid WalletId,
+    Guid AccountId) : IRequest<Result<GetBalanceResponse>>;
 
 /// <summary>
 /// Resposta da query de saldo.

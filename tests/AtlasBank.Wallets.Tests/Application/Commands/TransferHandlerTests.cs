@@ -44,6 +44,7 @@ public sealed class TransferHandlerTests
 
         var command = new TransferCommand(
             source.Id,
+            source.AccountId,
             destination.Id,
             50,
             "BRL",
@@ -70,6 +71,7 @@ public sealed class TransferHandlerTests
 
         var command = new TransferCommand(
             source.Id,
+            source.AccountId,
             destination.Id,
             50,
             "BRL",
@@ -87,7 +89,7 @@ public sealed class TransferHandlerTests
     {
         // Arrange
         var walletId = Guid.NewGuid();
-        var command = new TransferCommand(walletId, walletId, 50, "BRL", Guid.NewGuid().ToString());
+        var command = new TransferCommand(walletId, Guid.NewGuid(), walletId, 50, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -107,6 +109,7 @@ public sealed class TransferHandlerTests
             .Returns((Wallet?)null);
 
         var command = new TransferCommand(
+            Guid.NewGuid(),
             Guid.NewGuid(),
             destination.Id,
             50,
@@ -134,6 +137,7 @@ public sealed class TransferHandlerTests
 
         var command = new TransferCommand(
             source.Id,
+            source.AccountId,
             Guid.NewGuid(),
             50,
             "BRL",
@@ -161,6 +165,7 @@ public sealed class TransferHandlerTests
 
         var command = new TransferCommand(
             source.Id,
+            source.AccountId,
             destination.Id,
             100,
             "BRL",
@@ -179,6 +184,7 @@ public sealed class TransferHandlerTests
     {
         // Arrange
         var command = new TransferCommand(
+            Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
             50,

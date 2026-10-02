@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.Wallets.Application.Commands.CreateWallet;
 using AtlasBank.Wallets.Application.Commands.Deposit;
@@ -11,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AtlasBank.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public sealed class WalletsController : ControllerBase
@@ -46,7 +49,7 @@ public sealed class WalletsController : ControllerBase
         Guid walletId,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetBalanceQuery(walletId), cancellationToken);
+        var result = await _mediator.Send(new GetBalanceQuery(walletId, GetAccountId()), cancellationToken);
 
         if (result.IsFailure)
             return NotFound(ApiResponse<GetBalanceResponse>.Fail(result.Error));
@@ -66,7 +69,7 @@ public sealed class WalletsController : ControllerBase
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetStatementQuery(walletId, from, to, page, pageSize);
+        var query = new GetStatementQuery(walletId, GetAccountId(), from, to, page, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
 
         if (result.IsFailure)
@@ -85,7 +88,7 @@ public sealed class WalletsController : ControllerBase
         [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
         CancellationToken cancellationToken)
     {
-        var command = new DepositCommand(walletId, request.Amount, request.Currency, idempotencyKey);
+        var command = new DepositCommand(walletId, GetAccountId(), request.Amount, request.Currency, idempotencyKey);
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
@@ -104,7 +107,7 @@ public sealed class WalletsController : ControllerBase
         [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
         CancellationToken cancellationToken)
     {
-        var command = new WithdrawCommand(walletId, request.Amount, request.Currency, idempotencyKey);
+        var command = new WithdrawCommand(walletId, GetAccountId(), request.Amount, request.Currency, idempotencyKey);
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
@@ -125,6 +128,7 @@ public sealed class WalletsController : ControllerBase
     {
         var command = new TransferCommand(
             walletId,
+            GetAccountId(),
             request.DestinationWalletId,
             request.Amount,
             request.Currency,
@@ -137,6 +141,9 @@ public sealed class WalletsController : ControllerBase
 
         return Ok(ApiResponse<string>.Ok(null!, "Transfer completed successfully."));
     }
+
+    private Guid GetAccountId()    
+        => Guid.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
 }
 
 // Request DTOs

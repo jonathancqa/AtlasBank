@@ -9,6 +9,7 @@ namespace AtlasBank.Wallets.Application.Queries.GetStatement;
 /// </summary>
 public sealed record GetStatementQuery(
     Guid WalletId,
+    Guid AccountId,
     DateTime? From = null,
     DateTime? To = null,
     int Page = 1,

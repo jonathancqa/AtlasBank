@@ -39,6 +39,9 @@ public sealed class DepositHandler : IRequestHandler<DepositCommand, Result>
         if (wallet is null)
             return Result.Failure("Wallet not found.");
 
+        if (wallet.AccountId != command.AccountId)
+            return Result.Failure("Wallet not found.");
+
         // Executa o depósito no domínio
         var depositResult = wallet.Deposit(moneyResult.Value, keyResult.Value);
         if (depositResult.IsFailure)

@@ -43,6 +43,9 @@ public sealed class TransferHandler : IRequestHandler<TransferCommand, Result>
             command.SourceWalletId, cancellationToken);
         if (source is null)
             return Result.Failure("Source wallet not found.");
+        
+        if (source.AccountId != command.AccountId)
+            return Result.Failure("Access denied.");
 
         // Busca carteira destino
         var destination = await _repository.GetByIdAsync(

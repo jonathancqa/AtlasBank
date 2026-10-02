@@ -23,6 +23,9 @@ public sealed class GetStatementHandler : IRequestHandler<GetStatementQuery, Res
         if (wallet is null)
             return Result.Failure<GetStatementResponse>("Wallet not found.");
 
+        if (wallet.AccountId != query.AccountId)
+            return Result.Failure<GetStatementResponse>("Access denied.");
+
         // Filtra por período
         var transactions = wallet.Transactions.AsEnumerable();
 

@@ -39,6 +39,9 @@ public sealed class WithdrawHandler : IRequestHandler<WithdrawCommand, Result>
         if (wallet is null)
             return Result.Failure("Wallet not found.");
 
+        if (wallet.AccountId != command.AccountId)
+            return Result.Failure("Access denied.");
+
         // Executa o saque no domínio
         var withdrawResult = wallet.Withdraw(moneyResult.Value, keyResult.Value);
         if (withdrawResult.IsFailure)

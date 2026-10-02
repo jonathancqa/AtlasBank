@@ -38,7 +38,7 @@ public sealed class WithdrawHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new WithdrawCommand(wallet.Id, 50, "BRL", Guid.NewGuid().ToString());
+        var command = new WithdrawCommand(wallet.Id, wallet.AccountId, 50, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -55,7 +55,7 @@ public sealed class WithdrawHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new WithdrawCommand(wallet.Id, 50, "BRL", Guid.NewGuid().ToString());
+        var command = new WithdrawCommand(wallet.Id, wallet.AccountId, 50, "BRL", Guid.NewGuid().ToString());
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
@@ -72,7 +72,7 @@ public sealed class WithdrawHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new WithdrawCommand(wallet.Id, 100, "BRL", Guid.NewGuid().ToString());
+        var command = new WithdrawCommand(wallet.Id, wallet.AccountId, 100, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -89,7 +89,7 @@ public sealed class WithdrawHandlerTests
         _repository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((Wallet?)null);
 
-        var command = new WithdrawCommand(Guid.NewGuid(), 50, "BRL", Guid.NewGuid().ToString());
+        var command = new WithdrawCommand(Guid.NewGuid(), Guid.NewGuid(), 50, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -107,7 +107,7 @@ public sealed class WithdrawHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new WithdrawCommand(wallet.Id, 0, "BRL", Guid.NewGuid().ToString());
+        var command = new WithdrawCommand(wallet.Id, wallet.AccountId, 0, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -121,7 +121,7 @@ public sealed class WithdrawHandlerTests
     public async Task Handle_WithEmptyIdempotencyKey_ShouldFail()
     {
         // Arrange
-        var command = new WithdrawCommand(Guid.NewGuid(), 50, "BRL", "");
+        var command = new WithdrawCommand(Guid.NewGuid(), Guid.NewGuid(), 50, "BRL", "");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -135,7 +135,7 @@ public sealed class WithdrawHandlerTests
     public async Task Handle_WithNegativeAmount_ShouldFail()
     {
         // Arrange
-        var command = new WithdrawCommand(Guid.NewGuid(), -50, "BRL", Guid.NewGuid().ToString());
+        var command = new WithdrawCommand(Guid.NewGuid(), Guid.NewGuid(), -50, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

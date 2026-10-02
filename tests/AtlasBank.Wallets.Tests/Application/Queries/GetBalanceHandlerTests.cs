@@ -35,7 +35,7 @@ public sealed class GetBalanceHandlerTests
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var query = new GetBalanceQuery(wallet.Id);
+        var query = new GetBalanceQuery(wallet.Id, wallet.AccountId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -54,7 +54,7 @@ public sealed class GetBalanceHandlerTests
         _repository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((Wallet?)null);
 
-        var query = new GetBalanceQuery(Guid.NewGuid());
+        var query = new GetBalanceQuery(Guid.NewGuid(), Guid.NewGuid());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -72,7 +72,7 @@ public sealed class GetBalanceHandlerTests
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var query = new GetBalanceQuery(wallet.Id);
+        var query = new GetBalanceQuery(wallet.Id, wallet.AccountId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

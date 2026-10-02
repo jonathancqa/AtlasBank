@@ -39,7 +39,7 @@ public sealed class DepositHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new DepositCommand(wallet.Id, 100, "BRL", Guid.NewGuid().ToString());
+        var command = new DepositCommand(wallet.Id, wallet.AccountId, 100, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -56,7 +56,7 @@ public sealed class DepositHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new DepositCommand(wallet.Id, 100, "BRL", Guid.NewGuid().ToString());
+        var command = new DepositCommand(wallet.Id, wallet.AccountId, 100, "BRL", Guid.NewGuid().ToString());
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
@@ -72,7 +72,7 @@ public sealed class DepositHandlerTests
         _repository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((Wallet?)null);
 
-        var command = new DepositCommand(Guid.NewGuid(), 100, "BRL", Guid.NewGuid().ToString());
+        var command = new DepositCommand(Guid.NewGuid(), Guid.NewGuid(), 100, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -90,7 +90,7 @@ public sealed class DepositHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new DepositCommand(wallet.Id, -100, "BRL", Guid.NewGuid().ToString());
+        var command = new DepositCommand(wallet.Id, wallet.AccountId, -100, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -108,7 +108,7 @@ public sealed class DepositHandlerTests
         _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
 
-        var command = new DepositCommand(wallet.Id, 0, "BRL", Guid.NewGuid().ToString());
+        var command = new DepositCommand(wallet.Id, wallet.AccountId, 0, "BRL", Guid.NewGuid().ToString());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -122,7 +122,7 @@ public sealed class DepositHandlerTests
     public async Task Handle_WithEmptyIdempotencyKey_ShouldFail()
     {
         // Arrange
-        var command = new DepositCommand(Guid.NewGuid(), 100, "BRL", "");
+        var command = new DepositCommand(Guid.NewGuid(), Guid.NewGuid(), 100, "BRL", "");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

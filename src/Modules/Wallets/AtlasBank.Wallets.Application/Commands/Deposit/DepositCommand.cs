@@ -9,6 +9,7 @@ namespace AtlasBank.Wallets.Application.Commands.Deposit;
 /// </summary>
 public sealed record DepositCommand(
     Guid WalletId,
+    Guid AccountId,
     decimal Amount,
     string Currency,
     string IdempotencyKey) : IRequest<Result>;

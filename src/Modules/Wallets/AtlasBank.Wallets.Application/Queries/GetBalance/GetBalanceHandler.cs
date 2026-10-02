@@ -23,6 +23,9 @@ public sealed class GetBalanceHandler : IRequestHandler<GetBalanceQuery, Result<
         if (wallet is null)
             return Result.Failure<GetBalanceResponse>("Wallet not found.");
 
+        if (wallet.AccountId != query.AccountId)
+            return Result.Failure<GetBalanceResponse>("Access denied.");
+
         return Result.Success(new GetBalanceResponse(
             wallet.Id,
             wallet.Balance.Amount,

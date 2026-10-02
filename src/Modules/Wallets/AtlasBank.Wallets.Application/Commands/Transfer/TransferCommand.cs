@@ -10,6 +10,7 @@ namespace AtlasBank.Wallets.Application.Commands.Transfer;
 /// </summary>
 public sealed record TransferCommand(
     Guid SourceWalletId,
+    Guid AccountId,
     Guid DestinationWalletId,
     decimal Amount,
     string Currency,
