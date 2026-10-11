@@ -33,21 +33,21 @@ public sealed class AccountRepository : IAccountRepository
         CancellationToken cancellationToken = default)
         => await _context.Accounts
             .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Document.Number == document, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Document.Number == new string(document.Where(char.IsDigit).ToArray()), cancellationToken);
 
     public async Task<bool> ExistsByEmailAsync(
         string email,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
             .AsNoTracking()
-            .AnyAsync(a => a.Email.Address == email, cancellationToken);
+            .AnyAsync(a => a.Email.Address == email.Trim().ToLowerInvariant(), cancellationToken);
 
     public async Task<bool> ExistsByDocumentAsync(
         string document,
         CancellationToken cancellationToken = default)
         => await _context.Accounts
             .AsNoTracking()
-            .AnyAsync(a => a.Document.Number == document, cancellationToken);
+            .AnyAsync(a => a.Document.Number == new string(document.Where(char.IsDigit).ToArray()), cancellationToken);
 
     public async Task AddAsync(
         Account account,
