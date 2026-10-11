@@ -1,4 +1,5 @@
 using AtlasBank.Accounts.Application.Abstractions;
+using AtlasBank.Accounts.Application.Abstractions.Services;
 using AtlasBank.Accounts.Domain.Entities;
 using AtlasBank.SharedKernel.Primitives;
 using MediatR;
@@ -13,10 +14,12 @@ public sealed class CreateAccountHandler : IRequestHandler<CreateAccountCommand,
 {
     private readonly IAccountRepository _repository;
     private readonly IAccountsUnitOfWork _accountsUnitOfWork;
-    public CreateAccountHandler(IAccountRepository repository, IAccountsUnitOfWork accountsUnitOfWork)
+    private readonly IPasswordHasher _passwordHasher;
+    public CreateAccountHandler(IAccountRepository repository, IAccountsUnitOfWork accountsUnitOfWork, IPasswordHasher passwordHasher)
     {
         _repository = repository;
         _accountsUnitOfWork = accountsUnitOfWork;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<Guid>> Handle(
@@ -38,7 +41,7 @@ public sealed class CreateAccountHandler : IRequestHandler<CreateAccountCommand,
             return Result.Failure<Guid>("An account with this document already exists.");
 
         // Gera hash da senha — nunca persistir senha em texto puro
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Password);
+        var passwordHash = _passwordHasher.Hash(command.Password);
 
         // Cria o agregado — validações de domínio acontecem aqui
         var accountResult = Account.Create(

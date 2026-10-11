@@ -11,6 +11,7 @@ public sealed class LoginHandlerTests
 {
     private readonly IAccountRepository _repository;
     private readonly IJwtService _jwtService;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly LoginHandler _handler;
 
     private const string ValidEmail = "jonathan@atlasbank.com";
@@ -21,17 +22,17 @@ public sealed class LoginHandlerTests
     {
         _repository = Substitute.For<IAccountRepository>();
         _jwtService = Substitute.For<IJwtService>();
-        _handler = new LoginHandler(_repository, _jwtService);
+        _passwordHasher = Substitute.For<IPasswordHasher>();
+        _handler = new LoginHandler(_repository, _jwtService, _passwordHasher);
     }
 
     private static Account CreateActiveAccount()
     {
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(ValidPassword);
         return Account.Create(
             "Jonathan Alves",
             ValidEmail,
-            "40734024800",
-            passwordHash).Value;
+            "70487210735",
+            "any_hash").Value;
     }
 
     [Fact]
@@ -43,6 +44,7 @@ public sealed class LoginHandlerTests
         _repository.GetByEmailAsync(ValidEmail, Arg.Any<CancellationToken>())
             .Returns(account);
         _jwtService.GenerateToken(account).Returns(ValidToken);
+        _passwordHasher.Verify(ValidPassword, Arg.Any<string>()).Returns(true);
 
         var command = new LoginCommand(ValidEmail, ValidPassword);
 
@@ -60,8 +62,9 @@ public sealed class LoginHandlerTests
         // Arrange
         _repository.GetByEmailAsync(ValidEmail, Arg.Any<CancellationToken>())
             .Returns((Account?)null);
+        _passwordHasher.Verify("WrongPassword@123", Arg.Any<string>()).Returns(false);
 
-        var command = new LoginCommand(ValidEmail, ValidPassword);
+        var command = new LoginCommand(ValidEmail, "WrongPassword@123");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

@@ -18,11 +18,13 @@ public sealed class LoginHandler : IRequestHandler<LoginCommand, Result<string>>
 {
     private readonly IAccountRepository _repository;
     private readonly IJwtService _jwtService;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public LoginHandler(IAccountRepository repository, IJwtService jwtService)
+    public LoginHandler(IAccountRepository repository, IJwtService jwtService, IPasswordHasher passwordHasher)
     {
         _repository = repository;
         _jwtService = jwtService;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<string>> Handle(
@@ -41,7 +43,7 @@ public sealed class LoginHandler : IRequestHandler<LoginCommand, Result<string>>
         return Result.Failure<string>("Account is inactive.");
 
         // Valida a senha contra o hash armazenado
-        var isPasswordValid = BCrypt.Net.BCrypt.Verify(
+        var isPasswordValid = _passwordHasher.Verify(
             command.Password, account.PasswordHash);
 
         if (!isPasswordValid)

@@ -1,4 +1,5 @@
 using AtlasBank.Accounts.Application.Abstractions;
+using AtlasBank.Accounts.Application.Abstractions.Services;
 using AtlasBank.Accounts.Application.Commands.CreateAccount;
 using AtlasBank.Accounts.Domain.Entities;
 using AtlasBank.SharedKernel.Abstractions;
@@ -11,18 +12,21 @@ public sealed class CreateAccountHandlerTests
 {
     private readonly IAccountRepository _repository;
     private readonly IAccountsUnitOfWork _accountsUnitOfWork;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly CreateAccountHandler _handler;
 
     private const string ValidFullName = "Jonathan Alves";
     private const string ValidEmail = "jonathan@atlasbank.com";
-    private const string ValidDocument = "40734024800";
+    private const string ValidDocument = "70487210735";
     private const string ValidPassword = "Atlas@2026";
 
     public CreateAccountHandlerTests()
     {
         _repository = Substitute.For<IAccountRepository>();
         _accountsUnitOfWork = Substitute.For<IAccountsUnitOfWork>();
-        _handler = new CreateAccountHandler(_repository, _accountsUnitOfWork);
+        _passwordHasher = Substitute.For<IPasswordHasher>();
+        _passwordHasher.Hash(Arg.Any<string>()).Returns("hashed_password");
+        _handler = new CreateAccountHandler(_repository, _accountsUnitOfWork, _passwordHasher);
     }
 
     [Fact]

@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAccountsUnitOfWork, AccountsUnitOfWork>();
+        services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(
