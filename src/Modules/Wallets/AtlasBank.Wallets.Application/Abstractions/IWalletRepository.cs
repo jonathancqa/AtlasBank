@@ -1,3 +1,4 @@
+using AtlasBank.Wallets.Application.ReadModels;
 using AtlasBank.Wallets.Domain.Entities;
 
 namespace AtlasBank.Wallets.Application.Abstractions;
@@ -21,6 +22,9 @@ public interface IWalletRepository
 
     /// <summary>Verifica se já existe transação com a chave de idempotência informada.</summary>
     Task<bool> ExistsByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken = default);
+
+    /// <summary>Busca o extrato paginado diretamente no banco via Dapper.</summary>
+    Task<(IReadOnlyList<TransactionReadModel> Transactions, int Total)> GetStatementAsync(Guid walletId, DateTime? from, DateTime? to, int page, int pageSize, CancellationToken cancellationToken = default);
 
     /// <summary>Persiste uma nova carteira.</summary>
     Task AddAsync(Wallet wallet, CancellationToken cancellationToken = default);

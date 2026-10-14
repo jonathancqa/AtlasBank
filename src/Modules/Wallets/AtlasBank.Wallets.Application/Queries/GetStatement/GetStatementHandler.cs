@@ -1,5 +1,6 @@
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.Wallets.Application.Abstractions;
+using AtlasBank.Wallets.Domain.Enums;
 using MediatR;
 
 namespace AtlasBank.Wallets.Application.Queries.GetStatement;
@@ -20,44 +21,35 @@ public sealed class GetStatementHandler : IRequestHandler<GetStatementQuery, Res
     {
         var wallet = await _repository.GetByIdReadOnlyAsync(query.WalletId, cancellationToken);
 
-        if (wallet is null)
-            return Result.Failure<GetStatementResponse>("Wallet not found.");
+    if (wallet is null)
+        return Result.Failure<GetStatementResponse>("Wallet not found.");
 
-        if (wallet.AccountId != query.AccountId)
-            return Result.Failure<GetStatementResponse>("Access denied.");
+    if (wallet.AccountId != query.AccountId)
+        return Result.Failure<GetStatementResponse>("Access denied.");
 
-        // Filtra por período
-        var transactions = wallet.Transactions.AsEnumerable();
+    var (transactions, total) = await _repository.GetStatementAsync(
+        query.WalletId,
+        query.From,
+        query.To,
+        query.Page,
+        query.PageSize,
+        cancellationToken);
 
-        if (query.From.HasValue)
-            transactions = transactions.Where(t => t.CreatedAt >= query.From.Value);
+    var transactionResponses = transactions.Select(t => new TransactionResponse(
+        t.Id,
+        Enum.Parse<TransactionType>(t.Type),
+        t.Amount,
+        t.Currency,
+        t.RelatedWalletId,
+        t.CreatedAt)).ToList();
 
-        if (query.To.HasValue)
-            transactions = transactions.Where(t => t.CreatedAt <= query.To.Value);
-
-        var total = transactions.Count();
-
-        // Paginação
-        var paged = transactions
-            .OrderByDescending(t => t.CreatedAt)
-            .Skip((query.Page - 1) * query.PageSize)
-            .Take(query.PageSize)
-            .Select(t => new TransactionResponse(
-                t.Id,
-                t.Type,
-                t.Amount.Amount,
-                t.Amount.Currency,
-                t.RelatedWalletId,
-                t.CreatedAt))
-            .ToList();
-
-        return Result.Success(new GetStatementResponse(
-            wallet.Id,
-            wallet.Balance.Amount,
-            wallet.Balance.Currency,
-            total,
-            query.Page,
-            query.PageSize,
-            paged));
+    return Result.Success(new GetStatementResponse(
+        wallet.Id,
+        wallet.Balance.Amount,
+        wallet.Balance.Currency,
+        total,
+        query.Page,
+        query.PageSize,
+        transactionResponses));
     }
 }

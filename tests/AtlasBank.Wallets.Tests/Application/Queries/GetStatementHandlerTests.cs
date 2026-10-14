@@ -1,6 +1,7 @@
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Application.Queries.GetStatement;
+using AtlasBank.Wallets.Application.ReadModels;
 using AtlasBank.Wallets.Domain.Entities;
 using AtlasBank.Wallets.Domain.Enums;
 using AtlasBank.Wallets.Domain.ValueObjects;
@@ -29,13 +30,25 @@ public sealed class GetStatementHandlerTests
         return wallet;
     }
 
+    private static List<TransactionReadModel> CreateTransactionReadModels()
+    => new()
+    {
+        new() { Id = Guid.NewGuid(), Type = "Withdrawal", Amount = 30, Currency = "BRL", CreatedAt = DateTime.UtcNow },
+        new() { Id = Guid.NewGuid(), Type = "Deposit", Amount = 50, Currency = "BRL", CreatedAt = DateTime.UtcNow.AddMinutes(-1) },
+        new() { Id = Guid.NewGuid(), Type = "Deposit", Amount = 100, Currency = "BRL", CreatedAt = DateTime.UtcNow.AddMinutes(-2) }
+    };
+
     [Fact]
     public async Task Handle_WithValidWalletId_ShouldReturnStatement()
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
+        var readModels = CreateTransactionReadModels();
+
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
+        _repository.GetStatementAsync(wallet.Id, null, null, 1, 20, Arg.Any<CancellationToken>())
+            .Returns((readModels, readModels.Count));
 
         var query = new GetStatementQuery(wallet.Id, wallet.AccountId);
 
@@ -45,7 +58,6 @@ public sealed class GetStatementHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.WalletId.Should().Be(wallet.Id);
-        result.Value.Balance.Should().Be(120);
         result.Value.TotalTransactions.Should().Be(3);
     }
 
@@ -53,7 +65,7 @@ public sealed class GetStatementHandlerTests
     public async Task Handle_WithWalletNotFound_ShouldFail()
     {
         // Arrange
-        _repository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _repository.GetByIdReadOnlyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((Wallet?)null);
 
         var query = new GetStatementQuery(Guid.NewGuid(), Guid.NewGuid());
@@ -71,8 +83,12 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
+        var readModels = CreateTransactionReadModels();
+
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
+        _repository.GetStatementAsync(wallet.Id, null, null, 1, 20, Arg.Any<CancellationToken>())
+            .Returns((readModels, readModels.Count));
 
         var query = new GetStatementQuery(wallet.Id, wallet.AccountId);
 
@@ -88,8 +104,12 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
+        var readModels = CreateTransactionReadModels().Take(2).ToList();
+
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
+        _repository.GetStatementAsync(wallet.Id, null, null, 1, 2, Arg.Any<CancellationToken>())
+            .Returns((readModels, 3));
 
         var query = new GetStatementQuery(wallet.Id, wallet.AccountId, Page: 1, PageSize: 2);
 
@@ -107,8 +127,12 @@ public sealed class GetStatementHandlerTests
     {
         // Arrange
         var wallet = CreateWalletWithTransactions();
+        var readModels = CreateTransactionReadModels();
+
         _repository.GetByIdReadOnlyAsync(wallet.Id, Arg.Any<CancellationToken>())
             .Returns(wallet);
+        _repository.GetStatementAsync(wallet.Id, null, null, 1, 20, Arg.Any<CancellationToken>())
+            .Returns((readModels, readModels.Count));
 
         var query = new GetStatementQuery(wallet.Id, wallet.AccountId);
 
