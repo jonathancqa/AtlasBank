@@ -64,12 +64,12 @@ builder.Services.AddMediatR(cfg =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapGet("/", () => Results.Redirect("/swagger"));
-}
+//}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

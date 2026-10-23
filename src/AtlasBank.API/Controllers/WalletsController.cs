@@ -142,8 +142,14 @@ public sealed class WalletsController : ControllerBase
         return Ok(ApiResponse<string>.Ok(null!, "Transfer completed successfully."));
     }
 
-    private Guid GetAccountId()    
-        => Guid.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+    private Guid GetAccountId()
+    {
+        var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? throw new InvalidOperationException("AccountId claim not found.");
+
+        return Guid.Parse(sub);
+    }    
 }
 
 // Request DTOs

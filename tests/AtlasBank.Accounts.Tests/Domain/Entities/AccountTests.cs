@@ -8,7 +8,7 @@ public sealed class AccountTests
 {
     private const string ValidFullName = "Jonathan Alves";
     private const string ValidEmail = "jonathan@atlasbank.com";
-    private const string ValidDocument = "40734024800";
+    private const string ValidDocument = "70487210735";
     private const string ValidPasswordHash = "$2a$11$validhashfortesting123456789012345678901234";
 
     [Fact]

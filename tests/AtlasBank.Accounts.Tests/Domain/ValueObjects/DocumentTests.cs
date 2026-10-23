@@ -9,42 +9,42 @@ public sealed class DocumentTests
     public void Create_WithValidCpf_ShouldSucceed()
     {
         // Arrange
-        var cpf = "407.340.248-00";
+        var cpf = "704.872.107-35";
 
         // Act
         var result = Document.Create(cpf);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Number.Should().Be("40734024800");
+        result.Value.Number.Should().Be("70487210735");
     }
 
     [Fact]
     public void Create_WithValidCpfWithoutFormatting_ShouldSucceed()
     {
         // Arrange
-        var cpf = "40734024800";
+        var cpf = "70487210735";
 
         // Act
         var result = Document.Create(cpf);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Number.Should().Be("40734024800");
+        result.Value.Number.Should().Be("70487210735");
     }
 
     [Fact]
     public void Create_WithValidCpf_ShouldReturnFormattedCpf()
     {
         // Arrange
-        var cpf = "40734024800";
+        var cpf = "70487210735";
 
         // Act
         var result = Document.Create(cpf);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Formatted.Should().Be("407.340.248-00");
+        result.Value.Formatted.Should().Be("704.872.107-35");
     }
 
     [Theory]
@@ -92,7 +92,7 @@ public sealed class DocumentTests
     public void Create_WithInvalidCheckDigits_ShouldFail()
     {
         // Arrange — CPF com dígitos verificadores errados
-        var cpf = "40734024801";
+        var cpf = "70487210736";
 
         // Act
         var result = Document.Create(cpf);
@@ -106,8 +106,8 @@ public sealed class DocumentTests
     public void TwoDocumentsWithSameNumber_ShouldBeEqual()
     {
         // Arrange
-        var doc1 = Document.Create("40734024800").Value;
-        var doc2 = Document.Create("40734024800").Value;
+        var doc1 = Document.Create("70487210735").Value;
+        var doc2 = Document.Create("70487210735").Value;
 
         // Assert
         doc1.Should().Be(doc2);

@@ -1,14 +1,22 @@
 ﻿services:
   atlasbank-api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "5000:8080"
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Host=db;Database=atlasbank;Username=postgres;Password=postgres
+      - Jwt__SecretKey=atlasbank-super-secret-key-2026-minimum-32-chars!
+      - Jwt__Issuer=AtlasBank.API
+      - Jwt__Audience=AtlasBank.Clients
+      - Jwt__ExpirationMinutes=60
       - PaymentGateway__Provider=Mock
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
   db:
     image: postgres:16
@@ -25,6 +33,7 @@
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 volumes:
   pgdata:
