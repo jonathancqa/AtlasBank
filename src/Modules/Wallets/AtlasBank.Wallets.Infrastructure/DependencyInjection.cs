@@ -5,8 +5,12 @@ using AtlasBank.Wallets.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AtlasBank.SharedKernel.Behaviors;
+using FluentValidation;
+using MediatR;
 
 namespace AtlasBank.Wallets.Infrastructure;
+
 
 /// <summary>
 /// Registra os serviços do módulo Wallets no container de DI.
@@ -22,10 +26,14 @@ public static class DependencyInjection
 
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IWalletsUnitOfWork, WalletsUnitOfWork>();
-
+        
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(
-                typeof(CreateWalletCommand).Assembly));
+        {
+            cfg.RegisterServicesFromAssembly(typeof(CreateWalletCommand).Assembly);
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
+        });
+
+        services.AddValidatorsFromAssembly(typeof(CreateWalletCommand).Assembly);
 
         return services;
     }

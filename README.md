@@ -186,7 +186,7 @@ dotnet test
 - [x] Wallets infrastructure — EF Core mapping, repository, migrations, Unit of Work
 - [x] API — AccountsController, WalletsController, Swagger, enum serialization
 - [x] Tests — 125 unit tests, 0 failures
-- [ ] Authentication — [Authorize] on endpoints, IDOR prevention
+- [x] Authentication — [Authorize] on endpoints, IDOR prevention
 - [ ] Payments domain — IPaymentGateway abstraction
 - [ ] Payments infrastructure — MockGateway, MercadoPago sandbox (Pix, boleto, card)
 - [ ] CI — GitHub Actions (build + tests)

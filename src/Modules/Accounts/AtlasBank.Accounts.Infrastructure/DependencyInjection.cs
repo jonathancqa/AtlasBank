@@ -7,6 +7,9 @@ using AtlasBank.Accounts.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AtlasBank.SharedKernel.Behaviors;
+using FluentValidation;
+using MediatR;
 
 namespace AtlasBank.Accounts.Infrastructure;
 
@@ -26,10 +29,14 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAccountsUnitOfWork, AccountsUnitOfWork>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
-
+        
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(
-                typeof(CreateAccountCommand).Assembly));
+        {
+            cfg.RegisterServicesFromAssembly(typeof(CreateAccountCommand).Assembly);
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
+        });
+
+        services.AddValidatorsFromAssembly(typeof(CreateAccountCommand).Assembly);
 
         return services;
     }

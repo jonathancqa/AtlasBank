@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace AtlasBank.SharedKernel.Primitives
@@ -19,6 +20,7 @@ namespace AtlasBank.SharedKernel.Primitives
         public string? Message { get; init; }
 
         ///<summary>Dados retornados em caso de sucesso.</summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public T? Data { get; init; }
 
         private ApiResponse() { }
