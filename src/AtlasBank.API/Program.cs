@@ -2,6 +2,7 @@ using System.Text;
 using AtlasBank.Accounts.Infrastructure;
 using AtlasBank.Wallets.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -63,6 +64,14 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var accountsContext = scope.ServiceProvider.GetRequiredService<AtlasBank.Accounts.Infrastructure.Persistence.AccountsDbContext>();
+    await accountsContext.Database.MigrateAsync();
+    var walletsContext = scope.ServiceProvider.GetRequiredService<AtlasBank.Wallets.Infrastructure.Persistence.WalletsDbContext>();
+    await walletsContext.Database.MigrateAsync();
+}
 
 //if (app.Environment.IsDevelopment())
 //{
