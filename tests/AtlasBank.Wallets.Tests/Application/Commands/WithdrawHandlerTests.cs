@@ -6,6 +6,7 @@ using AtlasBank.Wallets.Domain.Entities;
 using AtlasBank.Wallets.Domain.ValueObjects;
 using FluentAssertions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace AtlasBank.Wallets.Tests.Application.Commands;
 
@@ -143,5 +144,26 @@ public sealed class WithdrawHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Amount cannot be negative.");
+    }
+
+    [Fact]
+    public async Task Handle_WhenConcurrencyConflictOccurs_ShouldReturnFailure()
+    {
+        // Arrange
+        var wallet = CreateWalletWithBalance(100m);
+        _repository.GetByIdAsync(wallet.Id, Arg.Any<CancellationToken>())
+            .Returns(wallet);
+
+        _walletsUnitOfWork.CommitAsync(Arg.Any<CancellationToken>())
+            .ThrowsAsync(new AtlasBank.SharedKernel.Exceptions.ConcurrencyException());
+
+        var command = new WithdrawCommand(wallet.Id, wallet.AccountId, 50m, "BRL", Guid.NewGuid().ToString());
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Contain("concurrency conflict");
     }
 }

@@ -24,6 +24,9 @@ public sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         builder.Property(w => w.CreatedAt)
             .IsRequired();
 
+        builder.Property(w => w.Version)
+            .IsRowVersion();
+
         // Mapeamento do Value Object Money (Balance)
         builder.OwnsOne(w => w.Balance, balance =>
         {

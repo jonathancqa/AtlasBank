@@ -2,6 +2,7 @@ using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Domain.ValueObjects;
+using AtlasBank.SharedKernel.Exceptions;
 using MediatR;
 
 namespace AtlasBank.Wallets.Application.Commands.Withdraw;
@@ -48,7 +49,15 @@ public sealed class WithdrawHandler : IRequestHandler<WithdrawCommand, Result>
             return Result.Failure(withdrawResult.Error);
 
         await _repository.UpdateAsync(wallet, cancellationToken);
-        await _walletsUnitOfWork.CommitAsync(cancellationToken);
+
+        try
+        {
+            await _walletsUnitOfWork.CommitAsync(cancellationToken);
+        }
+        catch (ConcurrencyException)
+        {
+            return Result.Failure("A concurrency conflict occurred. The wallet was modified by another operation. Please retry.");
+        }
 
         return Result.Success();
     }

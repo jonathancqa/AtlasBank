@@ -6,6 +6,7 @@ using AtlasBank.Wallets.Domain.Entities;
 using AtlasBank.Wallets.Domain.ValueObjects;
 using FluentAssertions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace AtlasBank.Wallets.Tests.Application.Commands;
 
@@ -197,5 +198,30 @@ public sealed class TransferHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Idempotency key is required.");
+    }
+
+    [Fact]
+    public async Task Handle_WhenConcurrencyConflictOccurs_ShouldReturnFailure()
+    {
+        // Arrange
+        var source = CreateWalletWithBalance(100m);
+        var destination = CreateWalletWithBalance(50m);
+
+        _repository.GetByIdAsync(source.Id, Arg.Any<CancellationToken>())
+            .Returns(source);
+        _repository.GetByIdAsync(destination.Id, Arg.Any<CancellationToken>())
+            .Returns(destination);
+
+        _walletsUnitOfWork.CommitAsync(Arg.Any<CancellationToken>())
+            .ThrowsAsync(new AtlasBank.SharedKernel.Exceptions.ConcurrencyException());
+
+        var command = new TransferCommand(source.Id, source.AccountId, destination.Id, 30m, "BRL", Guid.NewGuid().ToString());
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Contain("concurrency conflict");
     }
 }

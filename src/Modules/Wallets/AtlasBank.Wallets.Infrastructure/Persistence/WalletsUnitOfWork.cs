@@ -1,5 +1,6 @@
+using AtlasBank.SharedKernel.Exceptions;
 using AtlasBank.Wallets.Application.Abstractions;
-using AtlasBank.Wallets.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace AtlasBank.Wallets.Infrastructure.Persistence;
 
@@ -14,5 +15,14 @@ public sealed class WalletsUnitOfWork : IWalletsUnitOfWork
         => _context = context;
 
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
-        => await _context.SaveChangesAsync(cancellationToken);
+    {
+        try
+        {
+            return await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyException("The wallet was modified by another operation. Please retry.", ex);
+        }
+    }
 }

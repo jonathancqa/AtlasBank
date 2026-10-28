@@ -1,3 +1,4 @@
+using AtlasBank.SharedKernel.Exceptions;
 using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
@@ -65,7 +66,15 @@ public sealed class TransferHandler : IRequestHandler<TransferCommand, Result>
         // Persiste ambas as carteiras
         await _repository.UpdateAsync(source, cancellationToken);
         await _repository.UpdateAsync(destination, cancellationToken);
-        await _walletsUnitOfWork.CommitAsync(cancellationToken);
+        
+        try
+        {
+            await _walletsUnitOfWork.CommitAsync(cancellationToken);
+        }
+        catch (ConcurrencyException)
+        {
+            return Result.Failure("A concurrency conflict occurred. One of the wallets was modified by another operation. Please retry.");
+        }
 
         return Result.Success();
     }

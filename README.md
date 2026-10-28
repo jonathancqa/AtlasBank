@@ -1,4 +1,4 @@
-# 🏦 AtlasBank
+# 🏦 AtlasBank [![AtlasBank CI](https://github.com/jonathancqa/AtlasBank/actions/workflows/ci.yml/badge.svg)](https://github.com/jonathancqa/AtlasBank/actions/workflows/ci.yml)
 
 > A fictional digital bank backend built with .NET 10, Clean Architecture, DDD and financial-grade consistency patterns.
 
@@ -187,10 +187,10 @@ dotnet test
 - [x] API — AccountsController, WalletsController, Swagger, enum serialization
 - [x] Tests — 125 unit tests, 0 failures
 - [x] Authentication — [Authorize] on endpoints, IDOR prevention
+- [x] CI — GitHub Actions (build + tests)
+- [x] Docker — Dockerfile + full docker-compose with API + PostgreSQL
 - [ ] Payments domain — IPaymentGateway abstraction
 - [ ] Payments infrastructure — MockGateway, MercadoPago sandbox (Pix, boleto, card)
-- [ ] CI — GitHub Actions (build + tests)
-- [ ] Docker — Dockerfile + full docker-compose with API + PostgreSQL
 - [ ] Concurrency — RowVersion optimistic concurrency control
 - [ ] Audit log — append-only financial event log
 
@@ -214,4 +214,4 @@ dotnet test
 
 **Jonathan Alves**
 - GitHub: [@jonathancqa](https://github.com/jonathancqa)
-- LinkedIn: [linkedin.com/in/jonathan-alves](https://linkedin.com/in/jonathan-alves)
+- LinkedIn: [linkedin.com/in/jonathancqa](https://linkedin.com/in/jonathancqa)

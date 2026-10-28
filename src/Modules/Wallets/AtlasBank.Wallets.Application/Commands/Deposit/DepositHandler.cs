@@ -2,6 +2,7 @@ using AtlasBank.SharedKernel.Primitives;
 using AtlasBank.SharedKernel.ValueObjects;
 using AtlasBank.Wallets.Application.Abstractions;
 using AtlasBank.Wallets.Domain.ValueObjects;
+using AtlasBank.SharedKernel.Exceptions;
 using MediatR;
 
 namespace AtlasBank.Wallets.Application.Commands.Deposit;
@@ -17,7 +18,7 @@ public sealed class DepositHandler : IRequestHandler<DepositCommand, Result>
     public DepositHandler(IWalletRepository repository, IWalletsUnitOfWork walletsUnitOfWork)
     {
         _repository = repository;
-        _walletsUnitOfWork = walletsUnitOfWork;        
+        _walletsUnitOfWork = walletsUnitOfWork;
     }
 
     public async Task<Result> Handle(
@@ -48,7 +49,15 @@ public sealed class DepositHandler : IRequestHandler<DepositCommand, Result>
             return Result.Failure(depositResult.Error);
 
         await _repository.UpdateAsync(wallet, cancellationToken);
-        await _walletsUnitOfWork.CommitAsync(cancellationToken);
+
+        try
+        {
+            await _walletsUnitOfWork.CommitAsync(cancellationToken);
+        }
+        catch (ConcurrencyException)
+        {
+            return Result.Failure("A concurrency conflict occurred. The wallet was modified by another operation. Please retry.");
+        }
 
         return Result.Success();
     }

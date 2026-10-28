@@ -23,6 +23,9 @@ public sealed class Wallet : AggregateRoot
     /// <summary>Data de criação da carteira.</summary>
     public DateTime CreatedAt { get; private set; }
 
+    /// <summary>Token de concorrência otimista.</summary>
+    public uint Version { get; private set; }
+
     /// <summary>Histórico de transações da carteira.</summary>
     public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
 
