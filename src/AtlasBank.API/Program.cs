@@ -40,6 +40,8 @@ builder.Services.AddSwaggerGen(options =>
 // Módulos
 builder.Services.AddAccountsModule(builder.Configuration);
 builder.Services.AddWalletsModule(builder.Configuration);
+var jwtKey = builder.Configuration["Jwt:SecretKey"]
+            ?? throw new InvalidOperationException("Jwt:SecretKey não configurada.");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -47,7 +49,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -56,7 +58,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+            Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
@@ -73,14 +75,23 @@ using (var scope = app.Services.CreateScope())
     await walletsContext.Database.MigrateAsync();
 }
 
-//if (app.Environment.IsDevelopment())
-//{
+var enableSwagger = app.Environment.IsDevelopment()
+    || app.Configuration.GetValue<bool>("Swagger:Enabled");
+
+if (enableSwagger)
+{
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapGet("/", () => Results.Redirect("/swagger"));
-//}
+}
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.MapGet("/health", () => Results.Ok());
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

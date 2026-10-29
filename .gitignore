@@ -3,4 +3,5 @@ obj/
 *.user
 .vs/
 .vscode/
-appsettings.Development.json
+.env
+appsettings.Production.json

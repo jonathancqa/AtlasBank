@@ -8,10 +8,11 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Host=db;Database=atlasbank;Username=postgres;Password=postgres
-      - Jwt__SecretKey=atlasbank-super-secret-key-2026-minimum-32-chars!
+      - Jwt__SecretKey=apenas-dev-local-docker-compose-minimo-32-chars-xyz
       - Jwt__Issuer=AtlasBank.API
       - Jwt__Audience=AtlasBank.Clients
       - Jwt__ExpirationMinutes=60
+      - Swagger__Enabled=True
       - PaymentGateway__Provider=Mock
     depends_on:
       db:
