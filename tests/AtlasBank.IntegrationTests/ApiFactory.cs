@@ -7,13 +7,11 @@ namespace AtlasBank.IntegrationTests
 {
     public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
-        private readonly PostgreSqlContainer _db = new PostgreSqlBuilder()
-            .WithImage("postgres:16")
-            .Build();
+        private readonly PostgreSqlContainer _db = new PostgreSqlBuilder("postgres:16").Build();
 
         public async Task InitializeAsync() => await _db.StartAsync();
 
-        public async Task DisposeAsync() => await _db.DisposeAsync();
+        public new async Task DisposeAsync() => await _db.DisposeAsync();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
