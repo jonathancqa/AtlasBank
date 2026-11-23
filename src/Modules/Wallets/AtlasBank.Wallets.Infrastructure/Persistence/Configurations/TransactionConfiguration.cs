@@ -1,4 +1,5 @@
 using AtlasBank.Wallets.Domain.Entities;
+using AtlasBank.Wallets.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -47,18 +48,18 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
         });
 
         // Mapeamento do Value Object IdempotencyKey
-        builder.OwnsOne(t => t.IdempotencyKey, key =>
-        {
-            key.Property(k => k.Value)
-                .HasColumnName("idempotency_key")
-                .HasMaxLength(100)
-                .IsRequired();
-
-            key.HasIndex(k => k.Value)
-                .IsUnique();
-        });
+        builder.Property(t => t.IdempotencyKey)
+            .HasColumnName("idempotency_key")
+            .HasMaxLength(100)
+            .IsRequired()
+            .HasConversion(
+                key => key.Value,
+                value => IdempotencyKey.Create(value).Value);
 
         // Índice para busca por carteira ordenada por data
         builder.HasIndex(t => new { t.WalletId, t.CreatedAt });
+
+        // Índice único de idempotência por carteira
+        builder.HasIndex(t => new { t.WalletId, t.IdempotencyKey }).IsUnique();
     }
 }

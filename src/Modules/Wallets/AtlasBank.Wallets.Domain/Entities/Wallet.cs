@@ -121,10 +121,7 @@ public sealed class Wallet : AggregateRoot
     /// Transfere valor para outra carteira.
     /// Débito e crédito são atômicos — nunca um sem o outro.
     /// </summary>
-    public Result Transfer(
-        Wallet destination,
-        Money amount,
-        IdempotencyKey idempotencyKey)
+    public Result Transfer(Wallet destination, Money amount, IdempotencyKey idempotencyKey)
     {
         if (destination.Id == Id)
             return Result.Failure("Cannot transfer to the same wallet.");
@@ -135,30 +132,31 @@ public sealed class Wallet : AggregateRoot
         if (HasTransaction(idempotencyKey))
             return Result.Success(); // idempotente — já processado
 
+        // Instância própria para a perna de entrada: o EF não aceita o mesmo
+        // objeto de valor pertencendo a duas transações diferentes.
+        var incomingAmount = Money.Create(amount.Amount, amount.Currency);
+        if (incomingAmount.IsFailure)
+            return Result.Failure(incomingAmount.Error);
+
         // Débito na origem
         var subtractResult = Balance.Subtract(amount);
         if (subtractResult.IsFailure)
             return Result.Failure(subtractResult.Error);
-
-        Balance = subtractResult.Value;
 
         // Crédito no destino
         var addResult = destination.Balance.Add(amount);
         if (addResult.IsFailure)
             return Result.Failure(addResult.Error);
 
+        Balance = subtractResult.Value;
         destination.Balance = addResult.Value;
-        
+
         _transactions.Add(Transaction.CreateTransferOut(Id, amount, idempotencyKey, destination.Id));
-        destination._transactions.Add(Transaction.CreateTransferIn(destination.Id, amount, idempotencyKey, Id));
+        destination._transactions.Add(Transaction.CreateTransferIn(
+            destination.Id, incomingAmount.Value, IdempotencyKey.Generate(), Id));
 
         RaiseDomainEvent(new TransferCompletedEvent(
-            Id,
-            destination.Id,
-            Id,
-            amount.Amount,
-            amount.Currency,
-            DateTime.UtcNow));
+            Id, destination.Id, Id, amount.Amount, amount.Currency, DateTime.UtcNow));
 
         return Result.Success();
     }

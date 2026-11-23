@@ -31,6 +31,12 @@ namespace AtlasBank.Wallets.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("idempotency_key");
+
                     b.Property<Guid?>("RelatedWalletId")
                         .HasColumnType("uuid");
 
@@ -45,6 +51,9 @@ namespace AtlasBank.Wallets.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("WalletId", "CreatedAt");
+
+                    b.HasIndex("WalletId", "IdempotencyKey")
+                        .IsUnique();
 
                     b.ToTable("transactions", "wallets");
                 });
@@ -106,32 +115,7 @@ namespace AtlasBank.Wallets.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("TransactionId");
                         });
 
-                    b.OwnsOne("AtlasBank.Wallets.Domain.ValueObjects.IdempotencyKey", "IdempotencyKey", b1 =>
-                        {
-                            b1.Property<Guid>("TransactionId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
-                                .HasColumnName("idempotency_key");
-
-                            b1.HasKey("TransactionId");
-
-                            b1.HasIndex("Value")
-                                .IsUnique();
-
-                            b1.ToTable("transactions", "wallets");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TransactionId");
-                        });
-
                     b.Navigation("Amount")
-                        .IsRequired();
-
-                    b.Navigation("IdempotencyKey")
                         .IsRequired();
                 });
 
