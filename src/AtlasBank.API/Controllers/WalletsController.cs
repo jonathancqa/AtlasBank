@@ -28,9 +28,10 @@ public sealed class WalletsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<Guid>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<Guid>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(
-        [FromBody] CreateWalletCommand command,
+        [FromBody] CreateWalletRequest request,
         CancellationToken cancellationToken)
     {
+        var command = new CreateWalletCommand(GetAccountId(), request.Currency);
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
@@ -149,10 +150,11 @@ public sealed class WalletsController : ControllerBase
             ?? throw new InvalidOperationException("AccountId claim not found.");
 
         return Guid.Parse(sub);
-    }    
+    }
 }
 
 // Request DTOs
 public sealed record DepositRequest(decimal Amount, string Currency = "BRL");
 public sealed record WithdrawRequest(decimal Amount, string Currency = "BRL");
 public sealed record TransferRequest(Guid DestinationWalletId, decimal Amount, string Currency = "BRL");
+public sealed record CreateWalletRequest(string Currency = "BRL");

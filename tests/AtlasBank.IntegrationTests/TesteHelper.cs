@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace AtlasBank.IntegrationTests;
 
@@ -61,5 +62,62 @@ public static class TestData
         var token = await LoginAsync(client, email);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return new TestUser(client, accountId, email, Password);
+    }
+}
+
+public record WalletUser(HttpClient Client, Guid AccountId, Guid WalletId);
+
+public static class Check
+{
+    public static async Task Success(HttpResponseMessage res)
+    {
+        if (!res.IsSuccessStatusCode)
+            throw new Xunit.Sdk.XunitException(
+                $"HTTP {(int)res.StatusCode}: {await res.Content.ReadAsStringAsync()}");
+    }
+}
+
+public static class WalletData
+{
+    public static async Task<WalletUser> CreateWalletUserAsync(ApiFactory factory)
+    {
+        var user = await TestData.CreateAuthenticatedUserAsync(factory);
+        var res = await user.Client.PostAsJsonAsync("/api/Wallets", new { accountId = user.AccountId });
+        await Check.Success(res);
+        var body = await res.Content.ReadFromJsonAsync<ApiResponse<Guid>>();
+        return new WalletUser(user.Client, user.AccountId, body!.Data);
+    }
+
+    private static Task<HttpResponseMessage> PostWithKeyAsync(
+        HttpClient client, string url, object body, string? key)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body) };
+        req.Headers.Add("Idempotency-Key", key ?? Guid.NewGuid().ToString());
+        return client.SendAsync(req);
+    }
+
+    public static Task<HttpResponseMessage> DepositAsync(WalletUser u, decimal amount, string? key = null)
+        => PostWithKeyAsync(u.Client, $"/api/Wallets/{u.WalletId}/deposit",
+            new { amount, currency = "BRL" }, key);
+
+    public static Task<HttpResponseMessage> WithdrawAsync(WalletUser u, decimal amount, string? key = null)
+        => PostWithKeyAsync(u.Client, $"/api/Wallets/{u.WalletId}/withdraw",
+            new { amount, currency = "BRL" }, key);
+
+    public static Task<HttpResponseMessage> TransferAsync(
+        WalletUser from, Guid destinationWalletId, decimal amount, string? key = null)
+        => PostWithKeyAsync(from.Client, $"/api/Wallets/{from.WalletId}/transfer",
+            new { destinationWalletId, amount, currency = "BRL" }, key);
+
+    public static async Task<decimal> GetBalanceAsync(HttpClient client, Guid walletId)
+    {
+        var res = await client.GetAsync($"/api/Wallets/{walletId}/balance");
+        await Check.Success(res);
+        var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+        var data = json.GetProperty("data");
+        foreach (var p in data.EnumerateObject())
+            if (p.Value.ValueKind == JsonValueKind.Number)
+                return p.Value.GetDecimal();
+        throw new InvalidOperationException($"Nenhum campo numérico em data: {data}");
     }
 }
