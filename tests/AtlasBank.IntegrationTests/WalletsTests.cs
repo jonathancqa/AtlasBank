@@ -53,14 +53,16 @@ public class WalletsTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task Deposit_SameIdempotencyKeyTwice_AppliesOnlyOnce()
+    public async Task Deposit_SameKeyTwice_SecondReturnsSuccess_AndAppliesOnlyOnce()
     {
         var u = await WalletData.CreateWalletUserAsync(factory);
         var key = Guid.NewGuid().ToString();
 
-        await WalletData.DepositAsync(u, 100m, key);
-        await WalletData.DepositAsync(u, 100m, key); // pode devolver 200 ou 400; o que importa é o saldo
+        var first = await WalletData.DepositAsync(u, 100m, key);
+        var second = await WalletData.DepositAsync(u, 100m, key);
 
+        await Check.Success(first);
+        await Check.Success(second); // repetição devolve sucesso, sem 500
         Assert.Equal(100m, await WalletData.GetBalanceAsync(u.Client, u.WalletId));
     }
 
@@ -76,6 +78,40 @@ public class WalletsTests(ApiFactory factory)
 
         Assert.Equal(100m, await WalletData.GetBalanceAsync(a.Client, a.WalletId));
         Assert.Equal(100m, await WalletData.GetBalanceAsync(b.Client, b.WalletId));
+    }
+
+    [Fact]
+    public async Task Deposit_SameKeyConcurrently_AppliesOnlyOnce()
+    {
+        var u = await WalletData.CreateWalletUserAsync(factory);
+        var key = Guid.NewGuid().ToString();
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 5)
+            .Select(_ => WalletData.DepositAsync(u, 100m, key)));
+
+        var codes = results.Select(r => r.StatusCode).ToList();
+        Assert.DoesNotContain(codes, c => (int)c >= 500);
+        Assert.Contains(HttpStatusCode.OK, codes);
+        Assert.Equal(100m, await WalletData.GetBalanceAsync(u.Client, u.WalletId));
+    }
+
+    [Fact]
+    public async Task Withdraw_Concurrent_NeverOverdrawsWallet()
+    {
+        var u = await WalletData.CreateWalletUserAsync(factory);
+        await Check.Success(await WalletData.DepositAsync(u, 100m));
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 10)
+            .Select(_ => WalletData.WithdrawAsync(u, 30m))); // cada uma com chave nova
+
+        var codes = results.Select(r => r.StatusCode).ToList();
+        var applied = codes.Count(c => c == HttpStatusCode.OK);
+        var balance = await WalletData.GetBalanceAsync(u.Client, u.WalletId);
+
+        Assert.DoesNotContain(codes, c => (int)c >= 500);
+        Assert.InRange(applied, 1, 3);               // nunca mais saques do que o saldo permite
+        Assert.Equal(100m - applied * 30m, balance); // o saldo bate com o que foi aplicado
+        Assert.True(balance >= 0);
     }
 
     [Fact]
